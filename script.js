@@ -30,7 +30,15 @@ const printBoard = () => {
     const boardWithCellValues = board.map((row) => row.map((cell) => cell.getValue()))
     console.log(boardWithCellValues);
   };
-  
+
+//Método para ver si el tablero esta lleno (empate)
+const isBoardFull = () => {
+    return board.every(row => 
+        row.every(cell => cell.getValue() !== 0)
+    );
+};
+
+//Método para verificar ganador
 const checkWinner = () => {
     const boardValues = board.map((row) => row.map((cell) => cell.getValue()));
 
@@ -56,18 +64,21 @@ const checkWinner = () => {
         return boardValues[0][2];
     }
 
+    // Verificar empate
+    if (isBoardFull()) {
+        return 'draw';
+    }
+    
     return null; // No hay ganador aún
     };
 
-    return { getBoard, dropToken, printBoard, checkWinner };
+//Devuelve un objeto con los métodos públicos que podemos usar fuera de la función
+//principal del tablero. Sigue el patron modulo para encapsular la logica del juego
+return { getBoard, dropToken, printBoard, checkWinner };
 
-  //Devuelve un objeto con los métodos públicos que podemos usar fuera de la función
-  //principal del tablero. Sigue el patron modulo para encapsular la logica del juego
-  return { getBoard, dropToken, printBoard };
-
-  //Función para crear una celda con dos métodos: colocar una ficha o consultar el 
-  //valor de la celda
-  function Cell() {
+//Función para crear una celda con dos métodos: colocar una ficha o consultar el 
+//valor de la celda
+function Cell() {
     let value = 0;
     const addToken = (player) => {
       value = player;
