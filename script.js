@@ -68,13 +68,22 @@ const checkWinner = () => {
     if (isBoardFull()) {
         return 'draw';
     }
-    
+
     return null; // No hay ganador aún
     };
 
+// Método para reiniciar el tablero
+const resetBoard = () => {
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < columns; j++) {
+            board[i][j] = Cell();
+        }
+    }
+};
+
 //Devuelve un objeto con los métodos públicos que podemos usar fuera de la función
 //principal del tablero. Sigue el patron modulo para encapsular la logica del juego
-return { getBoard, dropToken, printBoard, checkWinner };
+return { getBoard, dropToken, printBoard, checkWinner, resetBoard };
 
 //Función para crear una celda con dos métodos: colocar una ficha o consultar el 
 //valor de la celda
