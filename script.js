@@ -120,6 +120,99 @@ const Gameboard = () => {
             resetBoard,
             isBoardFull 
         };
+};
+
+// Factory function for creating the game controller
+const GameController = (playerOneName = "Player 1", playerTwoName = "Player 2") => {
+    const players = [
+        { name: playerOneName, token: 1 },
+        { name: playerTwoName, token: 2 }
+    ];
+
+    const gameboard = Gameboard();
+    let activePlayer = players[0];
+    let gameOver = false;
+
+    // Internal function 1
+    const switchPlayerTurn = () => {
+        activePlayer = activePlayer === players[0] ? players[1] : players[0];
     };
 
+    // Internal function 2
+    const getActivePlayer = () => activePlayer;
+
+    // Internal function 3
+    const playRound = (row, column) => {
+        if (gameOver) {
+            console.log("Game is already over!");
+            return;
+        }
+
+        const dropResult = gameboard.dropToken(row, column, activePlayer.token);
+        
+        if (!dropResult) {
+            console.log("Invalid move. Try again.");
+            return;
+        }
+
+        const winner = gameboard.checkWinner();
+        
+        if (winner) {
+            gameOver = true;
+            if (winner === 'draw') {
+                console.log("It's a draw!");
+            } else {
+                const winningPlayer = players.find(player => player.token === winner);
+                console.log(`${winningPlayer.name} wins!`);
+            }
+            return;
+        }
+
+        switchPlayerTurn();
+    };
+
+    // Internal function 4
+    const resetGame = () => {
+        gameboard.resetBoard();
+        activePlayer = players[0];
+        gameOver = false;
+    };
+
+    return {
+        playRound,
+        getActivePlayer,
+        getGameboard: gameboard.getBoard,
+        resetGame
+    };
+};
+
+
+// Example usage
+const game = GameController();
+
+// Simulate a game
+function simulateGame() {
+    console.log("Starting game simulation:");
+    
+    // Moves that would result in a game
+    const moves = [
+        [0,0], [1,1], 
+        [0,1], [1,0], 
+        [0,2]
+    ];
+
+    moves.forEach((move, index) => {
+        console.log(`\nRound ${index + 1}`);
+        console.log(`Active player: ${game.getActivePlayer().name}`);
+        game.playRound(move[0], move[1]);
+        
+        // Print board after each move
+        const board = game.getGameboard();
+        board.forEach(row => {
+            console.log(row.map(cell => cell.getValue()));
+        });
+    });
+}
+
+simulateGame();
 
