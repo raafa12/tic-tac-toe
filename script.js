@@ -122,7 +122,4 @@ const Gameboard = () => {
         };
     };
 
-//Devuelve un objeto con los métodos públicos que podemos usar fuera de la función
-//principal del tablero. Sigue el patron modulo para encapsular la logica del juego
-return { getBoard, dropToken, printBoard, checkWinner, resetBoard };
 
