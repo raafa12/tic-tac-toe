@@ -132,87 +132,159 @@ const GameController = (playerOneName = "Player 1", playerTwoName = "Player 2") 
     const gameboard = Gameboard();
     let activePlayer = players[0];
     let gameOver = false;
+    let winner = null;
 
-    // Internal function 1
     const switchPlayerTurn = () => {
         activePlayer = activePlayer === players[0] ? players[1] : players[0];
     };
 
-    // Internal function 2
     const getActivePlayer = () => activePlayer;
 
-    // Internal function 3
     const playRound = (row, column) => {
         if (gameOver) {
             console.log("Game is already over!");
-            return;
+            return false;
         }
 
         const dropResult = gameboard.dropToken(row, column, activePlayer.token);
         
         if (!dropResult) {
             console.log("Invalid move. Try again.");
-            return;
+            return false;
         }
 
-        const winner = gameboard.checkWinner();
+        winner = gameboard.checkWinner();
         
         if (winner) {
             gameOver = true;
-            if (winner === 'draw') {
-                console.log("It's a draw!");
-            } else {
-                const winningPlayer = players.find(player => player.token === winner);
-                console.log(`${winningPlayer.name} wins!`);
-            }
-            return;
+            return true;
         }
 
         switchPlayerTurn();
+        return true;
     };
 
-    // Internal function 4
     const resetGame = () => {
         gameboard.resetBoard();
         activePlayer = players[0];
         gameOver = false;
+        winner = null;
     };
+
+    // Getters for game status
+    Object.defineProperties(this, {
+        'isGameOver': {
+            get: function() { return gameOver; }
+        },
+        'winner': {
+            get: function() { return winner; }
+        }
+    });
 
     return {
         playRound,
         getActivePlayer,
         getGameboard: gameboard.getBoard,
-        resetGame
+        resetGame,
+        get isGameOver() { return gameOver; },
+        get winner() { return winner; }
     };
 };
+
 
 
 // Example usage
 const game = GameController();
 
-// Simulate a game
-function simulateGame() {
-    console.log("Starting game simulation:");
+// This function sets up all the DOM interaction
+function setupGame() {
+    // Get DOM elements
+    const cells = document.querySelectorAll('.cell');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message';
     
-    // Moves that would result in a game
-    const moves = [
-        [0,0], [1,1], 
-        [0,1], [1,0], 
-        [0,2]
-    ];
-
-    moves.forEach((move, index) => {
-        console.log(`\nRound ${index + 1}`);
-        console.log(`Active player: ${game.getActivePlayer().name}`);
-        game.playRound(move[0], move[1]);
-        
-        // Print board after each move
+    const resetButton = document.createElement('button');
+    resetButton.textContent = 'New Game';
+    resetButton.className = 'reset-button';
+    
+    // Add message and button to the DOM
+    const mainSection = document.querySelector('.main-section');
+    mainSection.appendChild(messageDiv);
+    mainSection.appendChild(resetButton);
+    
+    // Initialize the game controller
+    const game = GameController("Player X", "Player O");
+    
+    // Map DOM cell IDs to board coordinates
+    const cellToCoordinates = {
+        'cell1': [0, 0], 'cell2': [0, 1], 'cell3': [0, 2],
+        'cell4': [1, 0], 'cell5': [1, 1], 'cell6': [1, 2], 
+        'cell7': [2, 0], 'cell8': [2, 1], 'cell9': [2, 2]
+    };
+    
+    // Map player tokens to display characters
+    const tokenDisplay = {
+        0: '',  // Empty cell
+        1: 'X',  // Player 1
+        2: 'O'   // Player 2
+    };
+    
+    // Function to update the board display based on the game state
+    function updateDisplay() {
         const board = game.getGameboard();
-        board.forEach(row => {
-            console.log(row.map(cell => cell.getValue()));
+        
+        // Update each cell with the correct token
+        cells.forEach(cell => {
+            const [row, col] = cellToCoordinates[cell.id];
+            cell.textContent = tokenDisplay[board[row][col].getValue()];
+        });
+        
+        // Update the message with the active player
+        const activePlayer = game.getActivePlayer();
+        messageDiv.textContent = `${activePlayer.name}'s turn`;
+    }
+    
+    // Handle cell clicks
+    cells.forEach(cell => {
+        cell.addEventListener('click', () => {
+            // Convert cell ID to board coordinates
+            const [row, col] = cellToCoordinates[cell.id];
+            
+            // If the cell already has content, it's already taken
+            if (cell.textContent !== '') {
+                messageDiv.textContent = 'That spot is already taken!';
+                return;
+            }
+            
+            // Play a round
+            const activePlayer = game.getActivePlayer();
+            game.playRound(row, col);
+            
+            // Update the display
+            updateDisplay();
+            
+            // Check for a winner or draw
+            const winner = game.getGameboard()[row][col].getValue();
+            if (game.isGameOver) {
+                if (game.winner === 'draw') {
+                    messageDiv.textContent = "It's a draw!";
+                } else {
+                    const winningPlayer = winner === 1 ? "Player X" : "Player O";
+                    messageDiv.textContent = `${winningPlayer} wins!`;
+                }
+            }
         });
     });
+    
+    // Handle reset button click
+    resetButton.addEventListener('click', () => {
+        game.resetGame();
+        updateDisplay();
+        messageDiv.textContent = `${game.getActivePlayer().name}'s turn`;
+    });
+    
+    // Initialize the display
+    updateDisplay();
 }
-
 
 
