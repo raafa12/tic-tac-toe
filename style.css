@@ -1,0 +1,93 @@
+body {
+    min-height: 100vh;
+    width: 100%;
+    display: grid;
+    grid:
+        "header" 15%
+        "main" 1fr
+        "footer" auto
+        / 1fr;
+    gap: 30px;
+    }
+
+.header-section{
+    grid-area: header;
+    display: grid;
+    text-align: center;
+    align-content: flex-end;
+}
+
+.main-section {
+    grid-area: main;
+    display: grid;
+    grid:
+        "gameboard" 1fr
+        "message" 15%
+        "button" 10%
+        / auto;
+    justify-items: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.gameboard {
+    grid-area: gameboard;
+    display: grid;
+    grid:
+        "cell1 cell2 cell3" 75px
+        "cell4 cell5 cell6" 75px
+        "cell7 cell8 cell9" 75px
+        / 75px 75px 75px;
+}
+
+#cell1 {
+    border-right: 2px solid black;
+    border-bottom: 2px solid black;
+}
+
+#cell2 {
+    border-bottom: 2px solid black;
+}
+
+#cell3 {
+    border-left: 2px solid black;
+    border-bottom: 2px solid black;
+}
+
+#cell4 {
+    border-right: 2px solid black;
+}
+
+#cell6 {
+border-left: 2px solid black;
+}
+
+#cell7 {
+    border-top: 2px solid black;
+    border-right: 2px solid black;
+}
+
+#cell8 {
+    border-top: 2px solid black;
+}
+
+#cell9 {
+    border-left: 2px solid black;
+    border-top: 2px solid black;
+}
+
+.cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.message {
+    grid-area: message;
+    font-weight: 550;
+    font-size: 1.2em;
+}
+
