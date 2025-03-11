@@ -214,5 +214,5 @@ function simulateGame() {
     });
 }
 
-simulateGame();
+
 
