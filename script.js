@@ -35,7 +35,7 @@ const Gameboard = () => {
 
     const getBoard = () => board;
 
-    //Función para colocar una ficha en la fila elegida
+    // Function to place a token in the chosen cell
     const dropToken = (row, column, player) => {
         if (board[row][column].getValue() !== 0) {
             return false;
@@ -44,8 +44,7 @@ const Gameboard = () => {
         return true;
     };
 
-
-    //Método para imprimir el tablero 
+    // Method to print the board
     const printBoard = () => {
         const boardWithCellValues = board.map((row) => 
             row.map((cell) => cell.getValue())
@@ -53,20 +52,20 @@ const Gameboard = () => {
         console.log(boardWithCellValues);
     };  
 
-    //Método para ver si el tablero esta lleno (empate)
+    // Method to check if the board is full (draw)
     const isBoardFull = () => {
         return board.every(row => 
             row.every(cell => cell.getValue() !== 0)
         );
     };
 
-    //Método para verificar ganador
+    // Method to check for a winner
     const checkWinner = () => {
         const boardValues = board.map((row) => 
             row.map((cell) => cell.getValue())
         );
 
-        // Verificar filas
+        // Check rows
         for (let i = 0; i < rows; i++) {
             if (boardValues[i][0] !== 0 && 
                 boardValues[i][0] === boardValues[i][1] && 
@@ -75,7 +74,7 @@ const Gameboard = () => {
             }
         }
 
-        // Verificar columnas
+        // Check columns
         for (let j = 0; j < columns; j++) {
             if (boardValues[0][j] !== 0 && 
                 boardValues[0][j] === boardValues[1][j] && 
@@ -84,7 +83,7 @@ const Gameboard = () => {
             }
         }
 
-        // Verificar diagonales
+        // Check diagonals
         if (boardValues[0][0] !== 0 && 
             boardValues[0][0] === boardValues[1][1] && 
             boardValues[1][1] === boardValues[2][2]) {
@@ -97,33 +96,33 @@ const Gameboard = () => {
             return boardValues[0][2];
         }
 
-        // Verificar empate
+        // Check for draw
         if (isBoardFull()) {
             return 'draw';
         }
         
         return null;
-        };
+    };
 
-        // Método para reiniciar el tablero
-        const resetBoard = () => {
-            board.forEach(row => 
-                row.forEach(cell => cell.reset())
-            );
-        };
-    
-        return { 
-            getBoard, 
-            dropToken, 
-            printBoard, 
-            checkWinner, 
-            resetBoard,
-            isBoardFull 
-        };
+    // Method to reset the board
+    const resetBoard = () => {
+        board.forEach(row => 
+            row.forEach(cell => cell.reset())
+        );
+    };
+
+    return { 
+        getBoard, 
+        dropToken, 
+        printBoard, 
+        checkWinner, 
+        resetBoard,
+        isBoardFull 
+    };
 };
 
 // Factory function for creating the game controller
-const GameController = (playerOneName = "Player 1", playerTwoName = "Player 2") => {
+const GameController = (playerOneName = "Player X", playerTwoName = "Player O") => {
     const players = [
         { name: playerOneName, token: 1 },
         { name: playerTwoName, token: 2 }
@@ -133,15 +132,15 @@ const GameController = (playerOneName = "Player 1", playerTwoName = "Player 2") 
     let activePlayer = players[0];
     let gameOver = false;
 
-    // Internal function 1
+    // Internal function 1: Switch active player
     const switchPlayerTurn = () => {
         activePlayer = activePlayer === players[0] ? players[1] : players[0];
     };
 
-    // Internal function 2
+    // Internal function 2: Get the active player
     const getActivePlayer = () => activePlayer;
 
-    // Internal function 3
+    // Internal function 3: Play a round
     const playRound = (row, column) => {
         if (gameOver) {
             console.log("Game is already over!");
@@ -171,7 +170,10 @@ const GameController = (playerOneName = "Player 1", playerTwoName = "Player 2") 
         switchPlayerTurn();
     };
 
-    // Internal function 4
+    // Get the game state
+    const isGameOver = () => gameOver;
+
+    // Internal function 4: Reset the game
     const resetGame = () => {
         gameboard.resetBoard();
         activePlayer = players[0];
@@ -182,34 +184,28 @@ const GameController = (playerOneName = "Player 1", playerTwoName = "Player 2") 
         playRound,
         getActivePlayer,
         getGameboard: gameboard.getBoard,
-        resetGame
+        resetGame,
+        isGameOver
     };
 };
 
 // Wait for the DOM to be fully loaded before running the game setup
 document.addEventListener('DOMContentLoaded', () => {
-    // Get all cell elements
+    // Game elements
+    const playerForm = document.getElementById('playerForm');
+    const gameContainer = document.getElementById('gameContainer');
+    const messageDiv = document.querySelector('.message');
+    const resetButton = document.querySelector('.reset-button');
+    const changeNamesButton = document.querySelector('.change-names-button');
     const cells = document.querySelectorAll('.cell');
     
-    // Create message element if it doesn't exist
-    let messageDiv = document.querySelector('.message');
-    if (!messageDiv) {
-        messageDiv = document.createElement('div');
-        messageDiv.className = 'message';
-        document.querySelector('.main-section').appendChild(messageDiv);
-    }
+    // Player name inputs
+    const player1Input = document.getElementById('player1');
+    const player2Input = document.getElementById('player2');
+    const startGameButton = document.getElementById('startGame');
     
-    // Create reset button if it doesn't exist
-    let resetButton = document.querySelector('.reset-button');
-    if (!resetButton) {
-        resetButton = document.createElement('button');
-        resetButton.textContent = 'New Game';
-        resetButton.className = 'reset-button';
-        document.querySelector('.main-section').appendChild(resetButton);
-    }
-    
-    // Initialize game with the original GameController
-    const game = GameController("Player X", "Player O");
+    // Game state
+    let game;
     
     // Map cell IDs to board coordinates
     const cellToCoordinates = {
@@ -225,6 +221,22 @@ document.addEventListener('DOMContentLoaded', () => {
         2: 'O'
     };
     
+    // Function to start the game with player names
+    function startGame() {
+        const player1Name = player1Input.value.trim() || "Player X";
+        const player2Name = player2Input.value.trim() || "Player O";
+        
+        // Initialize game controller with player names
+        game = GameController(player1Name, player2Name);
+        
+        // Hide form and show game board
+        playerForm.style.display = 'none';
+        gameContainer.style.display = 'flex';
+        
+        // Update the board display
+        updateBoard();
+    }
+    
     // Update the board display based on game state
     function updateBoard() {
         const board = game.getGameboard();
@@ -234,8 +246,10 @@ document.addEventListener('DOMContentLoaded', () => {
             cell.textContent = tokenDisplay[board[row][col].getValue()];
         });
         
-        // Update turn message
-        messageDiv.textContent = `${game.getActivePlayer().name}'s turn`;
+        // Update turn message if game is not over
+        if (!game.isGameOver()) {
+            messageDiv.textContent = `${game.getActivePlayer().name}'s turn`;
+        }
     }
     
     // Check if the game is over after a move
@@ -259,8 +273,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 messageDiv.textContent = "¡Es un empate!";
                 return true;
             } else {
-                const winnerName = winner === 1 ? "Player X" : "Player O";
-                messageDiv.textContent = `¡${winnerName} gana!`;
+                const winnerToken = winner === 1 ? "X" : "O";
+                const winnerName = winner === 1 ? 
+                    player1Input.value.trim() || "Player X" : 
+                    player2Input.value.trim() || "Player O";
+                messageDiv.textContent = `¡${winnerName} (${winnerToken}) gana!`;
                 return true;
             }
         }
@@ -276,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const board = game.getGameboard();
             
             // Check if the cell is already taken or if game is over
-            if (board[row][col].getValue() !== 0 || checkGameStatus()) {
+            if (board[row][col].getValue() !== 0 || game.isGameOver()) {
                 return;
             }
             
@@ -291,14 +308,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
+    // Handle start game button
+    startGameButton.addEventListener('click', startGame);
+    
     // Handle reset button
     resetButton.addEventListener('click', () => {
         game.resetGame();
         updateBoard();
     });
     
-    // Initialize the board display
-    updateBoard();
+    // Handle change names button
+    changeNamesButton.addEventListener('click', () => {
+        gameContainer.style.display = 'none';
+        playerForm.style.display = 'block';
+    });
 });
-
 
